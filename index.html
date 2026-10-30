@@ -96,19 +96,31 @@ button{ font-family: inherit; }
 .pressable{ transition: transform .12s ease-out; }
 .pressable:active{ transform: scale(0.95); }
 
-/* ---------- lock screen (deliberately bare: no logo, no name — mirrors a
-   system biometric prompt like Samsung Pass) ---------- */
+/* ---------- lock screen: wordmark pinned near the top, the unlock control
+   pinned low where a thumb naturally rests when holding the phone ---------- */
 #lockScreen{
   position: fixed; inset:0; z-index: 200;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap: 30px;
-  padding: 24px max(24px, env(safe-area-inset-right,0px)) 24px max(24px, env(safe-area-inset-left,0px));
+  display:flex; flex-direction:column; align-items:center;
+  padding: max(40px, calc(env(safe-area-inset-top,0px) + 32px)) max(24px, env(safe-area-inset-right,0px)) max(64px, calc(env(safe-area-inset-bottom,0px) + 56px)) max(24px, env(safe-area-inset-left,0px));
   text-align:center;
   background-color: var(--bg);
 }
-.lock-sub{ font-size:14.5px; color:var(--fg-muted); max-width:260px; line-height:1.5; font-weight:500; }
+.lock-wordmark{
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+.lock-bottom{
+  margin-top: auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap: 18px;
+}
+.lock-sub{ font-size:14px; color:var(--fg-muted); max-width:260px; line-height:1.5; font-weight:500; }
 .fp-btn{
-  width:84px; height:84px; border-radius:50%;
+  width:64px; height:64px; border-radius:50%;
   background: none;
   border: none !important;
   box-shadow: none !important;
@@ -118,7 +130,18 @@ button{ font-family: inherit; }
   color: var(--fg);
   cursor:pointer;
 }
-.fp-btn svg{ width:72px; height:72px; }
+.fp-icon-mask{
+  width: 46px; height: 55px;
+  background-color: currentColor;
+  -webkit-mask-image: url('icons/fingerprint-mask.png');
+  mask-image: url('icons/fingerprint-mask.png');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
 .fp-btn.pulse{ animation: fpPulse 2.4s ease-in-out infinite; }
 @keyframes fpPulse{
   0%,100%{ opacity: 1; transform: scale(1); }
@@ -145,19 +168,22 @@ button{ font-family: inherit; }
 .splash-word{
   font-size: clamp(32px, 11vw, 48px);
   font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.14;
+  letter-spacing: 0.1em;
+  line-height: 1.16;
   color: var(--fg);
   opacity:0;
-  transform: translateY(10px);
-  filter: blur(6px);
+  transform: translateY(14px) scale(0.94);
+  filter: blur(8px);
 }
-#splashScreen.show .splash-word{ animation: splashIn 1.1s cubic-bezier(.16,.9,.2,1) forwards; }
-#splashScreen.show .splash-word:nth-child(1){ animation-delay: .1s; }
-#splashScreen.show .splash-word:nth-child(2){ animation-delay: .5s; }
-#splashScreen.show .splash-word:nth-child(3){ animation-delay: .9s; }
+#splashScreen.show .splash-word{ animation: splashIn 1.3s cubic-bezier(.19,.86,.24,1) forwards; }
+#splashScreen.show .splash-word:nth-child(1){ animation-delay: .15s; }
+#splashScreen.show .splash-word:nth-child(2){ animation-delay: .55s; }
+#splashScreen.show .splash-word:nth-child(3){ animation-delay: .95s; }
 .splash-word.danger{ color: var(--st-girlfriend); }
-@keyframes splashIn{ to{ opacity:1; transform:translateY(0); filter:blur(0); } }
+@keyframes splashIn{
+  60%{ filter:blur(0); }
+  to{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); letter-spacing:-0.015em; }
+}
 
 /* ---------- top bar ---------- */
 .topbar{
@@ -449,6 +475,35 @@ button{ font-family: inherit; }
 .photo-picker img{ width:100%; height:100%; object-fit:cover; display:none; }
 .photo-picker-empty{ display:flex; flex-direction:column; align-items:center; gap:5px; color:var(--fg-faint); font-size:10.5px; font-weight:700; text-align:center; padding: 0 6px; }
 .photo-picker-actions{ display:flex; flex-direction:column; gap:9px; }
+
+/* crop sheet */
+.crop-frame{
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 1 / 1;
+  margin: 6px auto 0;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  background: #000;
+  touch-action: none;
+  cursor: grab;
+}
+.crop-frame:active{ cursor: grabbing; }
+.crop-image{
+  position: absolute;
+  top: 0; left: 0;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.crop-hint{
+  text-align:center;
+  font-size: 12px;
+  color: var(--fg-faint);
+  margin-top: 10px;
+}
+.crop-zoom-row{ display:flex; align-items:center; gap:12px; margin-top:16px; color: var(--fg-faint); }
+.crop-zoom-row input[type=range]{ flex:1 1 auto; accent-color: var(--accent); }
 .link-btn{ background:none; border:none; padding:0; font-size:13.5px; font-weight:650; color: var(--accent); cursor:pointer; text-align:left; }
 .link-btn.danger{ color: var(--st-girlfriend); }
 
@@ -476,22 +531,18 @@ button{ font-family: inherit; }
 <body>
 
 <div id="lockScreen">
-  <button class="fp-btn pulse pressable" id="fpBtn" aria-label="Otključaj otiskom prsta" hidden>
-    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-      <path d="M27.53 36.63 A8.00 8.00 0 1 1 36.47 36.63"/>
-      <path d="M24.45 41.19 A13.50 13.50 0 1 1 39.55 41.19"/>
-      <path d="M21.38 45.75 A19.00 19.00 0 1 1 42.62 45.75"/>
-      <path d="M18.30 50.31 A24.50 24.50 0 1 1 45.70 50.31"/>
-      <path d="M15.22 54.87 A30.00 30.00 0 1 1 48.78 54.87"/>
-      <path d="M29.55 32.06 A3.20 3.20 0 1 1 34.45 32.06"/>
-    </svg>
-  </button>
-  <div class="lock-sub" id="lockSub">Učitavanje…</div>
-  <div class="pin-wrap" id="pinWrap" hidden>
-    <input class="pin-input" id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="••••">
-    <button class="btn btn-primary" id="pinSubmit" style="width:170px;">Potvrdi</button>
+  <div class="lock-wordmark">PlayBook</div>
+  <div class="lock-bottom">
+    <div class="lock-sub" id="lockSub">Učitavanje…</div>
+    <button class="fp-btn pulse pressable" id="fpBtn" aria-label="Otključaj otiskom prsta" hidden>
+      <span class="fp-icon-mask"></span>
+    </button>
+    <div class="pin-wrap" id="pinWrap" hidden>
+      <input class="pin-input" id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="••••">
+      <button class="btn btn-primary" id="pinSubmit" style="width:170px;">Potvrdi</button>
+    </div>
+    <div class="lock-error" id="lockError"></div>
   </div>
-  <div class="lock-error" id="lockError"></div>
 </div>
 
 <div id="splashScreen">
@@ -629,6 +680,26 @@ button{ font-family: inherit; }
         <button type="button" class="btn btn-danger-solid" id="deleteConfirmBtn">Da, izbriši</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- crop sheet -->
+<div class="sheet-backdrop" id="cropBackdrop"><div></div></div>
+<div class="sheet" id="cropSheet" style="transform:translateY(100%)">
+  <div class="sheet-handle"></div>
+  <h2>Namjesti sliku</h2>
+  <div class="crop-frame" id="cropFrame">
+    <div class="crop-image" id="cropImage"></div>
+  </div>
+  <p class="crop-hint">Povuci da pomakneš, kliznikom zumiraj</p>
+  <div class="crop-zoom-row">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M8 11h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input type="range" id="cropZoom" min="100" max="320" value="100" step="1">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M8 11h6M11 8v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </div>
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="cropCancel">Odustani</button>
+    <button class="btn btn-primary" id="cropSave">Spremi</button>
   </div>
 </div>
 
@@ -932,9 +1003,7 @@ photoRemoveBtn.addEventListener("click", (e)=>{ e.stopPropagation(); formPhotoDa
 photoInput.addEventListener("change", ()=>{
   const file = photoInput.files[0];
   if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{ formPhotoData = reader.result; updatePhotoPreview(); };
-  reader.readAsDataURL(file);
+  startCrop(file);
 });
 function updatePhotoPreview(){
   if(formPhotoData){
@@ -950,6 +1019,126 @@ function updatePhotoPreview(){
     photoRemoveBtn.style.display = "none";
   }
 }
+
+/* ================= photo crop (drag to position, slider to zoom) ================= */
+const cropFrameEl = document.getElementById("cropFrame");
+const cropImageEl = document.getElementById("cropImage");
+const cropZoomEl = document.getElementById("cropZoom");
+let cropState = null;
+
+function openCropSheet(){
+  const sheetEl = document.getElementById("cropSheet");
+  const backdropEl = document.getElementById("cropBackdrop");
+  backdropEl.classList.add("show");
+  backdropEl.style.transition = reducedMotion ? "opacity .15s ease" : "opacity .3s ease";
+  backdropEl.style.opacity = "1";
+  const vh = window.innerHeight;
+  if(reducedMotion){ sheetEl.style.transform = "translateY(0)"; return; }
+  animateSpring({ from:vh, to:0, damping:1, response:0.42,
+    onUpdate:(v)=>{ sheetEl.style.transform = `translateY(${v}px)`; },
+    onComplete:()=>{ sheetEl._dragY = 0; }
+  });
+}
+function closeCropSheet(){
+  const sheetEl = document.getElementById("cropSheet");
+  const backdropEl = document.getElementById("cropBackdrop");
+  backdropEl.style.transition = "opacity .25s ease";
+  backdropEl.style.opacity = "0";
+  setTimeout(()=>backdropEl.classList.remove("show"), 250);
+  const vh = window.innerHeight;
+  if(reducedMotion){ sheetEl.style.transform = "translateY(100%)"; return; }
+  animateSpring({ from:0, to:vh, damping:1, response:0.36,
+    onUpdate:(v)=>{ sheetEl.style.transform = `translateY(${v}px)`; }
+  });
+}
+function clampCropOffset(){
+  const { dispW, dispH, frameSize } = cropState;
+  const minX = Math.min(0, frameSize - dispW), maxX = 0;
+  const minY = Math.min(0, frameSize - dispH), maxY = 0;
+  cropState.offsetX = Math.max(minX, Math.min(maxX, cropState.offsetX));
+  cropState.offsetY = Math.max(minY, Math.min(maxY, cropState.offsetY));
+}
+function renderCrop(){
+  cropImageEl.style.width = cropState.dispW + "px";
+  cropImageEl.style.height = cropState.dispH + "px";
+  cropImageEl.style.transform = `translate(${cropState.offsetX}px, ${cropState.offsetY}px)`;
+}
+function updateCropScale(){
+  const zoom = Number(cropZoomEl.value) / 100;
+  cropState.scale = cropState.baseScale * zoom;
+  cropState.dispW = cropState.iw * cropState.scale;
+  cropState.dispH = cropState.ih * cropState.scale;
+  clampCropOffset();
+  renderCrop();
+}
+function startCrop(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const frameSize = cropFrameEl.clientWidth || 300;
+      const baseScale = Math.max(frameSize / img.naturalWidth, frameSize / img.naturalHeight);
+      cropState = {
+        src: reader.result,
+        iw: img.naturalWidth, ih: img.naturalHeight,
+        frameSize, baseScale, scale: baseScale,
+        dispW: img.naturalWidth * baseScale, dispH: img.naturalHeight * baseScale,
+        offsetX: 0, offsetY: 0,
+      };
+      cropState.offsetX = (frameSize - cropState.dispW) / 2;
+      cropState.offsetY = (frameSize - cropState.dispH) / 2;
+      cropImageEl.style.backgroundImage = `url('${reader.result}')`;
+      cropImageEl.style.backgroundSize = "100% 100%";
+      cropZoomEl.value = 100;
+      renderCrop();
+      openCropSheet();
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+let cropDragging = false, cropStartX = 0, cropStartY = 0, cropStartOffX = 0, cropStartOffY = 0;
+cropFrameEl.addEventListener("pointerdown", (e)=>{
+  if(!cropState) return;
+  cropDragging = true;
+  cropFrameEl.setPointerCapture(e.pointerId);
+  cropStartX = e.clientX; cropStartY = e.clientY;
+  cropStartOffX = cropState.offsetX; cropStartOffY = cropState.offsetY;
+});
+cropFrameEl.addEventListener("pointermove", (e)=>{
+  if(!cropDragging || !cropState) return;
+  cropState.offsetX = cropStartOffX + (e.clientX - cropStartX);
+  cropState.offsetY = cropStartOffY + (e.clientY - cropStartY);
+  clampCropOffset();
+  renderCrop();
+});
+["pointerup","pointercancel"].forEach(ev=> cropFrameEl.addEventListener(ev, ()=>{ cropDragging = false; }));
+cropZoomEl.addEventListener("input", updateCropScale);
+document.getElementById("cropCancel").addEventListener("click", ()=>{
+  cropState = null;
+  photoInput.value = "";
+  closeCropSheet();
+});
+document.getElementById("cropSave").addEventListener("click", ()=>{
+  if(!cropState) return;
+  const OUT = 480;
+  const canvas = document.createElement("canvas");
+  canvas.width = OUT; canvas.height = OUT;
+  const ctx = canvas.getContext("2d");
+  const img = new Image();
+  img.onload = ()=>{
+    const scale = cropState.scale;
+    const sx = -cropState.offsetX / scale;
+    const sy = -cropState.offsetY / scale;
+    const sSize = cropState.frameSize / scale;
+    ctx.drawImage(img, sx, sy, sSize, sSize, 0, 0, OUT, OUT);
+    formPhotoData = canvas.toDataURL("image/jpeg", 0.88);
+    updatePhotoPreview();
+    cropState = null;
+    closeCropSheet();
+  };
+  img.src = cropState.src;
+});
 
 /* ================= add/edit form sheet ================= */
 const statusSelect = document.getElementById("f_status");
@@ -1149,7 +1338,7 @@ async function proceedAfterUnlock(){
       splash.style.display = "none";
       document.getElementById("appRoot").style.display = "block";
     }, 500);
-  }, 2600);
+  }, 2900);
 }
 
 async function tryBiometric(){
@@ -1157,7 +1346,7 @@ async function tryBiometric(){
   try{
     const hasCred = !!localStorage.getItem("pb_cred_id");
     if(!hasCred){
-      lockSub.textContent = "Potvrdi otisak prsta da postaviš zaključavanje.";
+      lockSub.textContent = "Skenirajte otisak prsta za postavljanje";
       await registerBiometric();
     } else {
       await verifyBiometric();
@@ -1202,7 +1391,7 @@ async function initLock(){
   pinWrap.hidden = true;
   if(available){
     fpBtn.hidden = false;
-    lockSub.textContent = hasCred ? "Dodirni za otključavanje" : "Dodirni za postavljanje otiska prsta";
+    lockSub.textContent = hasCred ? "Skenirajte otisak prsta za potvrdu identiteta" : "Skenirajte otisak prsta za postavljanje";
   } else {
     pinWrap.hidden = false;
     lockSub.textContent = hasPin ? "Unesi PIN" : "Postavi lokalni PIN";
