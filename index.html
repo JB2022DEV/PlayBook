@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>PlayBook</title>
-<meta name="theme-color" content="#0a0a10">
+<meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-32.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
@@ -16,12 +16,8 @@
    dashboard itself opens a glass bottom sheet for filters, detail and the
    add/edit form, each with spring-driven drag-to-dismiss. */
 :root{
-  --bg:#f3f2fa;
-  --bg-translucent:rgba(243,242,250,0.70);
-  --bg-blobs:
-    radial-gradient(52% 38% at 12% 8%, rgba(94,92,230,0.16), transparent 60%),
-    radial-gradient(48% 36% at 88% 20%, rgba(255,45,146,0.11), transparent 60%),
-    radial-gradient(55% 42% at 50% 100%, rgba(10,132,255,0.10), transparent 60%);
+  --bg:#ffffff;
+  --bg-translucent:rgba(255,255,255,0.72);
   --surface:rgba(255,255,255,0.55);
   --surface-2:rgba(255,255,255,0.68);
   --glass-border:rgba(255,255,255,0.75);
@@ -45,13 +41,9 @@
   --st-gotovo:#8e8e93;
 }
 :root[data-theme="dark"]{
-  --bg:#0a0a10;
-  --bg-translucent:rgba(10,10,16,0.62);
-  --bg-blobs:
-    radial-gradient(55% 40% at 14% 6%, rgba(125,122,255,0.32), transparent 60%),
-    radial-gradient(50% 38% at 90% 22%, rgba(255,45,146,0.20), transparent 60%),
-    radial-gradient(58% 46% at 50% 102%, rgba(10,132,255,0.22), transparent 60%);
-  --surface:rgba(255,255,255,0.07);
+  --bg:#000000;
+  --bg-translucent:rgba(0,0,0,0.70);
+  --surface:rgba(255,255,255,0.08);
   --surface-2:rgba(32,30,42,0.62);
   --glass-border:rgba(255,255,255,0.14);
   --glass-sheen:inset 0 1px 0 rgba(255,255,255,0.16);
@@ -72,9 +64,6 @@ html,body{ height:100%; }
 body{
   margin:0;
   background-color: var(--bg);
-  background-image: var(--bg-blobs);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
   color: var(--fg);
   font: 400 15px/1.4 -apple-system, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -85,7 +74,7 @@ body{
 /* glass material: translucent fill + blur + a light-catching top edge */
 .card, .sheet, .search-box, .filter-btn, .theme-toggle, .field-box, .note-block,
 .chip, .photo-picker, .form-field input, .form-field textarea, .form-field select,
-#locationSelect, .fp-btn, .pin-input{
+#locationSelect, .pin-input{
   backdrop-filter: blur(22px) saturate(1.7);
   -webkit-backdrop-filter: blur(22px) saturate(1.7);
   border: 1px solid var(--glass-border);
@@ -107,33 +96,33 @@ button{ font-family: inherit; }
 .pressable{ transition: transform .12s ease-out; }
 .pressable:active{ transform: scale(0.95); }
 
-/* ---------- lock screen ---------- */
+/* ---------- lock screen (deliberately bare: no logo, no name — mirrors a
+   system biometric prompt like Samsung Pass) ---------- */
 #lockScreen{
   position: fixed; inset:0; z-index: 200;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap: 26px;
+  gap: 30px;
   padding: 24px max(24px, env(safe-area-inset-right,0px)) 24px max(24px, env(safe-area-inset-left,0px));
   text-align:center;
   background-color: var(--bg);
-  background-image: var(--bg-blobs);
-  background-attachment: fixed;
 }
-.lock-icon{ width:96px; height:96px; border-radius:26px; overflow:hidden; box-shadow:0 16px 40px -14px var(--shadow); }
-.lock-icon img{ width:100%; height:100%; object-fit:cover; display:block; }
-.lock-title{ font-size:23px; font-weight:800; letter-spacing:-0.01em; }
-.lock-sub{ font-size:14px; color:var(--fg-muted); max-width:280px; line-height:1.5; }
+.lock-sub{ font-size:14.5px; color:var(--fg-muted); max-width:260px; line-height:1.5; font-weight:500; }
 .fp-btn{
-  width:86px; height:86px; border-radius:50%;
-  background: var(--surface);
-  box-shadow: var(--glass-sheen), 0 12px 32px -12px var(--shadow);
+  width:84px; height:84px; border-radius:50%;
+  background: none;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   display:flex; align-items:center; justify-content:center;
-  color: var(--accent);
+  color: var(--fg);
   cursor:pointer;
 }
-.fp-btn.pulse{ animation: fpPulse 1.8s ease-in-out infinite; }
+.fp-btn svg{ width:72px; height:72px; }
+.fp-btn.pulse{ animation: fpPulse 2.4s ease-in-out infinite; }
 @keyframes fpPulse{
-  0%,100%{ box-shadow: var(--glass-sheen), 0 0 0 0 rgba(94,92,230,0.33), 0 12px 32px -12px var(--shadow); }
-  50%{ box-shadow: var(--glass-sheen), 0 0 0 16px rgba(94,92,230,0), 0 12px 32px -12px var(--shadow); }
+  0%,100%{ opacity: 1; transform: scale(1); }
+  50%{ opacity: .55; transform: scale(0.96); }
 }
 .lock-error{ color: var(--st-girlfriend); font-size:13px; font-weight:650; min-height:18px; }
 .pin-wrap{ display:flex; flex-direction:column; align-items:center; gap:14px; }
@@ -142,17 +131,14 @@ button{ font-family: inherit; }
   padding:13px 10px 13px 22px; border-radius:14px;
   background: var(--surface); color: var(--fg); outline:none;
 }
-.lock-reset-link{ background:none; border:none; cursor:pointer; font-size:12.5px; color: var(--fg-faint); text-decoration:underline; }
 
 /* ---------- splash screen ---------- */
 #splashScreen{
   position: fixed; inset:0; z-index: 150;
-  display:none; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  display:none; flex-direction:column; align-items:center; justify-content:center; gap:4px;
   background-color: var(--bg);
-  background-image: var(--bg-blobs);
-  background-attachment: fixed;
   opacity:0;
-  transition: opacity .35s ease;
+  transition: opacity .5s ease;
 }
 #splashScreen.show{ display:flex; opacity:1; }
 #splashScreen.out{ opacity:0; }
@@ -160,17 +146,18 @@ button{ font-family: inherit; }
   font-size: clamp(32px, 11vw, 48px);
   font-weight: 800;
   letter-spacing: -0.02em;
-  line-height: 1.12;
+  line-height: 1.14;
   color: var(--fg);
   opacity:0;
-  transform: translateY(16px);
+  transform: translateY(10px);
+  filter: blur(6px);
 }
-#splashScreen.show .splash-word{ animation: splashIn .55s cubic-bezier(.22,1,.36,1) forwards; }
-#splashScreen.show .splash-word:nth-child(1){ animation-delay: .05s; }
-#splashScreen.show .splash-word:nth-child(2){ animation-delay: .24s; }
-#splashScreen.show .splash-word:nth-child(3){ animation-delay: .43s; }
+#splashScreen.show .splash-word{ animation: splashIn 1.1s cubic-bezier(.16,.9,.2,1) forwards; }
+#splashScreen.show .splash-word:nth-child(1){ animation-delay: .1s; }
+#splashScreen.show .splash-word:nth-child(2){ animation-delay: .5s; }
+#splashScreen.show .splash-word:nth-child(3){ animation-delay: .9s; }
 .splash-word.danger{ color: var(--st-girlfriend); }
-@keyframes splashIn{ to{ opacity:1; transform:translateY(0); } }
+@keyframes splashIn{ to{ opacity:1; transform:translateY(0); filter:blur(0); } }
 
 /* ---------- top bar ---------- */
 .topbar{
@@ -489,26 +476,22 @@ button{ font-family: inherit; }
 <body>
 
 <div id="lockScreen">
-  <div class="lock-icon"><img src="icons/icon-192.png" alt=""></div>
-  <div class="lock-title">PlayBook</div>
-  <div class="lock-sub" id="lockSub">Učitavanje…</div>
   <button class="fp-btn pulse pressable" id="fpBtn" aria-label="Otključaj otiskom prsta" hidden>
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 11a3 3 0 0 1 3 3v2a7 7 0 0 1-1 3.5"/>
-      <path d="M8 14v1a7.9 7.9 0 0 0 1 4"/>
-      <path d="M12 7a6 6 0 0 1 6 6v2a9 9 0 0 1-.3 2.3"/>
-      <path d="M6 13.5V14a9.9 9.9 0 0 0 .5 3.5"/>
-      <path d="M12 3a9 9 0 0 0-9 9v1.5"/>
-      <path d="M21 13v-1a9 9 0 0 0-3.4-7"/>
-      <path d="M12 11v3a2 2 0 0 0 2 2"/>
+    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M27.53 36.63 A8.00 8.00 0 1 1 36.47 36.63"/>
+      <path d="M24.45 41.19 A13.50 13.50 0 1 1 39.55 41.19"/>
+      <path d="M21.38 45.75 A19.00 19.00 0 1 1 42.62 45.75"/>
+      <path d="M18.30 50.31 A24.50 24.50 0 1 1 45.70 50.31"/>
+      <path d="M15.22 54.87 A30.00 30.00 0 1 1 48.78 54.87"/>
+      <path d="M29.55 32.06 A3.20 3.20 0 1 1 34.45 32.06"/>
     </svg>
   </button>
+  <div class="lock-sub" id="lockSub">Učitavanje…</div>
   <div class="pin-wrap" id="pinWrap" hidden>
     <input class="pin-input" id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="••••">
     <button class="btn btn-primary" id="pinSubmit" style="width:170px;">Potvrdi</button>
   </div>
   <div class="lock-error" id="lockError"></div>
-  <button class="lock-reset-link" id="lockResetBtn" hidden>Resetiraj zaključavanje</button>
 </div>
 
 <div id="splashScreen">
@@ -543,10 +526,6 @@ button{ font-family: inherit; }
   </div>
   <div class="grid" id="grid"></div>
 </div>
-
-<button class="pressable" id="fabAdd" aria-label="Dodaj novi profil" style="display:none;position:fixed;right:max(20px,calc(env(safe-area-inset-right,0px)+20px));bottom:max(20px,calc(env(safe-area-inset-bottom,0px)+20px));width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;border:none;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(10,132,255,0.55);z-index:20;cursor:pointer;">
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-</button>
 
 <!-- detail sheet -->
 <div class="sheet-backdrop" id="detailBackdrop"><div></div></div>
@@ -1011,7 +990,6 @@ document.getElementById("deleteConfirmBtn").addEventListener("click", async ()=>
   closeSheet(document.getElementById("formSheet"), document.getElementById("formBackdrop"));
   render();
 });
-document.getElementById("fabAdd").addEventListener("click", ()=> openForm(null));
 document.getElementById("addOpenBtn").addEventListener("click", ()=> openForm(null));
 document.getElementById("formCancel").addEventListener("click", ()=> closeSheet(document.getElementById("formSheet"), document.getElementById("formBackdrop")));
 document.getElementById("formSave").addEventListener("click", async ()=>{
@@ -1158,7 +1136,6 @@ const pinWrap = document.getElementById("pinWrap");
 const pinInput = document.getElementById("pinInput");
 const pinSubmit = document.getElementById("pinSubmit");
 const lockError = document.getElementById("lockError");
-const lockResetBtn = document.getElementById("lockResetBtn");
 
 function setLockError(msg){ lockError.textContent = msg || ""; }
 
@@ -1170,11 +1147,9 @@ async function proceedAfterUnlock(){
     splash.classList.add("out");
     setTimeout(()=>{
       splash.style.display = "none";
-      const appRoot = document.getElementById("appRoot");
-      appRoot.style.display = "block";
-      document.getElementById("fabAdd").style.display = "flex";
-    }, 320);
-  }, 2000);
+      document.getElementById("appRoot").style.display = "block";
+    }, 500);
+  }, 2600);
 }
 
 async function tryBiometric(){
@@ -1219,26 +1194,18 @@ async function tryPin(){
 pinSubmit.addEventListener("click", tryPin);
 pinInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter") tryPin(); });
 
-lockResetBtn.addEventListener("click", ()=>{
-  localStorage.removeItem("pb_cred_id");
-  localStorage.removeItem("pb_pin_hash");
-  setLockError("Zaključavanje resetirano. Postavi ga ponovno.");
-  initLock();
-});
-
 async function initLock(){
   const hasCred = !!localStorage.getItem("pb_cred_id");
   const hasPin = !!localStorage.getItem("pb_pin_hash");
   const available = await biometricAvailable();
   fpBtn.hidden = true;
   pinWrap.hidden = true;
-  lockResetBtn.hidden = !(hasCred || hasPin);
   if(available){
     fpBtn.hidden = false;
-    lockSub.textContent = hasCred ? "Otključaj otiskom prsta da nastaviš." : "Postavi otisak prsta za ovu aplikaciju.";
+    lockSub.textContent = hasCred ? "Dodirni za otključavanje" : "Dodirni za postavljanje otiska prsta";
   } else {
     pinWrap.hidden = false;
-    lockSub.textContent = hasPin ? "Unesi PIN da nastaviš." : "Otisak prsta nije dostupan na ovom uređaju — postavi lokalni PIN.";
+    lockSub.textContent = hasPin ? "Unesi PIN" : "Postavi lokalni PIN";
     pinInput.value = "";
     pinInput.focus();
   }
