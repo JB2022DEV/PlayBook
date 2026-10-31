@@ -281,6 +281,62 @@ button{ font-family: inherit; }
   border: 2px solid var(--bg);
 }
 
+/* ---------- bottom tab bar (main nav: Profili / Statistika) ---------- */
+.tabbar{
+  position: fixed; left:0; right:0; bottom:0; z-index:15;
+  display:flex; gap:6px;
+  padding: 8px max(16px, env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px, env(safe-area-inset-left,0px));
+  background: var(--bg-translucent);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border-top: 1px solid var(--border);
+}
+.tab-btn{
+  flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:3px;
+  background:none; border:none; padding:8px 0 6px; color: var(--fg-faint);
+  font-size:10.5px; font-weight:700; cursor:pointer;
+}
+.tab-btn.active{ color: var(--accent); }
+
+/* ---------- statistics page ---------- */
+#statsRoot{ display:none; }
+.stats-body{ padding: 4px 16px 120px; }
+.stats-body .section-label:first-child{ margin-top:4px; }
+.stat-bars{ display:flex; align-items:flex-end; gap:10px; height:150px; margin-top:4px; }
+.stat-col{ flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; min-width:0;
+  opacity:0; transform:translateY(10px); animation: statColIn 320ms var(--ease-out,ease) forwards; }
+@keyframes statColIn{ to{ opacity:1; transform:translateY(0); } }
+.stat-col .bar{ position:relative; width:100%; border-radius:8px 8px 3px 3px; background:linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 35%, transparent)); height:0; transition:height 650ms var(--ease-out,ease); }
+.stat-col.is-ended-now .bar{ background:var(--st-gotovo); opacity:.5; }
+/* mini avatar sits between the number and the bar — her face, not just a colour */
+.stat-avatar{
+  position:relative; width:26px; height:26px; border-radius:50%; flex:0 0 auto;
+  display:flex; align-items:center; justify-content:center;
+  font-size:8.5px; font-weight:800; color:#fff;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+/* "slept with her" is a fact that never goes away, so it's a separate marker
+   from the bar's own color (which only reflects that month's active/ended state) */
+.stat-avatar .sx{ position:absolute; bottom:-2px; right:-2px; width:11px; height:11px; border-radius:50%; background:#e0197a; box-shadow:0 0 0 2px var(--bg); }
+.stat-col .v{ font-size:12px; font-weight:800; font-variant-numeric:tabular-nums; }
+.stat-col.is-ended-now .v{ color:var(--fg-faint); }
+.stat-col .l{ font-size:10px; color:var(--fg-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:56px; }
+.stat-col.is-ended-now .l{ text-decoration:line-through; opacity:.65; }
+.stats-empty{ text-align:center; padding:60px 20px; color:var(--fg-faint); font-size:14px; line-height:1.6; }
+.stat-legend{ display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+.stat-row-wrap{ opacity:0; transform:translateY(6px); animation: statRowIn 280ms var(--ease-out,ease) forwards; }
+@keyframes statRowIn{ to{ opacity:1; transform:translateY(0); } }
+.stat-row{ display:flex; justify-content:space-between; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:13px 15px; font-size:14px; font-weight:650; }
+.stat-row.clickable{ cursor:pointer; }
+.stat-row .v-wrap{ display:flex; align-items:center; gap:6px; }
+.stat-row .v{ font-variant-numeric:tabular-nums; font-size:18px; font-weight:800; color:var(--accent); }
+.stat-row .row-chev{ color:var(--fg-faint); transition:transform 200ms var(--ease-out,ease); }
+.stat-row.open .row-chev{ transform:rotate(180deg); }
+.stat-breakdown{ margin-top:6px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:4px 15px; }
+.bd-row{ display:flex; justify-content:space-between; align-items:center; padding:10px 0; font-size:13px; color:var(--fg-muted); font-weight:600; border-bottom:1px solid var(--border); }
+.bd-row:last-child{ border-bottom:none; }
+.bd-row.empty{ color:var(--fg-faint); justify-content:center; font-weight:500; }
+
 /* ---------- grid ---------- */
 .grid{
   display:grid;
@@ -289,6 +345,7 @@ button{ font-family: inherit; }
   padding: 16px 0 140px;
 }
 .card{
+  position: relative;
   background: var(--surface);
   border-radius: 22px;
   overflow:hidden;
@@ -297,6 +354,15 @@ button{ font-family: inherit; }
   min-width: 0;
 }
 .card.ended .photo, .card.ended .meta{ filter: grayscale(0.85); opacity: 0.5; }
+/* sits as a direct child of .card (not inside .photo/.meta) so it stays in
+   full colour even when the "gotovo" card around it desaturates */
+.card .sex-mark{
+  position:absolute; top:8px; left:8px; z-index:3;
+  width:20px; height:20px; border-radius:50%;
+  background:#e0197a; box-shadow:0 0 0 2px rgba(0,0,0,0.35);
+  display:flex; align-items:center; justify-content:center;
+}
+.card .sex-mark svg{ width:11px; height:11px; }
 .photo{
   position:relative;
   aspect-ratio: 1 / 1;
@@ -443,25 +509,80 @@ button{ font-family: inherit; }
 }
 .btn-small.ok{ color: var(--st-slobodna); }
 
-/* detail sheet */
-.detail-head{ display:flex; gap:14px; align-items:center; }
-.detail-avatar{
-  width:64px; height:64px; border-radius:18px;
-  display:flex; align-items:center; justify-content:center;
-  color:#fff; font-weight:700; font-size:19px; flex:0 0 auto;
+/* ---------- full-screen profile (photo stack + every field) ---------- */
+.pscrim{ position:fixed; inset:0; background:var(--scrim); z-index:20; opacity:0; pointer-events:none; transition:opacity 220ms var(--ease-out,ease); }
+.pscrim.show{ opacity:1; pointer-events:auto; }
+.pdetail{
+  position:fixed; inset:0; z-index:21; background:var(--bg); overflow:hidden;
+  opacity:0; transform:scale(0.93); transition:opacity 260ms var(--ease-out,ease), transform 260ms var(--ease-out,ease);
+  pointer-events:none; display:flex; flex-direction:column;
 }
-.detail-head .nm{ font-size:19px; font-weight:800; letter-spacing:-0.01em; }
-.detail-head .sub{ font-size:13px; color:var(--fg-muted); margin-top:2px; }
-.detail-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:20px; }
+.pdetail.show{ opacity:1; transform:scale(1); pointer-events:auto; }
+.pdetail.closing{ transition-duration:200ms; }
+
+.stack-wrap{ position:relative; height:42vh; min-height:260px; flex:0 0 auto; overflow:hidden; touch-action:pan-y; background:#000; }
+.stack-track{ position:absolute; inset:0; display:flex; height:100%; width:100%; }
+.stack-slide{ flex:0 0 100%; height:100%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.55); font-weight:700; font-size:26px; background-size:cover; background-position:center; }
+.stack-slide.add{ flex-direction:column; gap:8px; color:rgba(255,255,255,0.6); background:rgba(255,255,255,0.05); border-left:1px dashed rgba(255,255,255,0.18); font-size:12px; font-weight:700; cursor:pointer; }
+.seg-row{ position:absolute; top:calc(env(safe-area-inset-top,0px) + 12px); left:12px; right:12px; display:flex; gap:4px; z-index:3; }
+.seg{ flex:1 1 0; height:3px; border-radius:2px; background:rgba(255,255,255,0.3); overflow:hidden; }
+.seg i{ display:block; height:100%; width:0%; background:#fff; }
+.seg.done i{ width:100%; }
+.p-close{ position:absolute; top:calc(env(safe-area-inset-top,0px) + 22px); right:12px; z-index:3; width:34px; height:34px; border-radius:50%; background:rgba(0,0,0,0.42); color:#fff; border:none; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
+.p-tapzone{ position:absolute; top:0; bottom:0; width:30%; z-index:2; }
+.p-tapzone.left{ left:0; } .p-tapzone.right{ right:0; }
+
+.pbody{ flex:1 1 auto; overflow-y:auto; padding:18px 20px calc(28px + env(safe-area-inset-bottom,0px)); }
+.rate-chip{ float:right; text-align:right; }
+.rate-chip .num{ font-variant-numeric:tabular-nums; font-size:24px; font-weight:800; letter-spacing:-0.02em; color:var(--fg); }
+.rate-chip .lbl{ font-size:9.5px; color:var(--fg-faint); text-transform:uppercase; letter-spacing:.05em; }
+.p-name-row{ display:flex; align-items:baseline; gap:9px; clear:left; }
+.p-name-row .nm{ font-size:21px; font-weight:800; letter-spacing:-0.01em; }
+.p-name-row .age{ font-size:14.5px; color:var(--fg-muted); font-weight:600; }
+.status-pill{ display:inline-flex; align-items:center; gap:6px; margin-top:9px; font-size:12px; font-weight:700; color:#fff; padding:5px 12px; border-radius:999px; }
+.status-pill .dot{ width:6px; height:6px; border-radius:50%; background:#fff; opacity:0.85; }
+
+.detail-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px; clear:both; }
+.field-box.copyable{ cursor:pointer; }
+.field-box.copyable label{ display:flex; align-items:center; justify-content:space-between; }
+.field-box.copyable label svg{ width:11px; height:11px; color:var(--fg-faint); }
+
 .note-block{ background: var(--surface); border:1px solid var(--border); border-radius:14px; padding:13px 14px; margin-top:12px; }
 .note-block .label{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--fg-faint); margin-bottom:4px; }
 .note-block p{ margin:0; font-size:14px; line-height:1.5; }
+
+.dates-row{ display:flex; align-items:center; justify-content:space-between; margin-top:14px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px 14px; cursor:pointer; }
+.dates-row .l{ font-size:14px; font-weight:650; }
+.dates-row .l small{ display:block; font-size:10.5px; color:var(--fg-faint); font-weight:500; margin-top:1px; }
+.dates-row .n{ font-variant-numeric:tabular-nums; font-size:19px; font-weight:800; color:var(--accent); }
+.sex-stat{ margin-top:10px; display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:14px; background:var(--surface); border:1px solid var(--border); font-size:13px; font-weight:650; color:var(--fg-muted); }
+.sex-stat .dot{ width:8px; height:8px; border-radius:50%; background:#e0197a; flex:0 0 auto; }
+.cal-legend{ display:flex; gap:16px; margin-top:12px; font-size:11px; color:var(--fg-faint); }
+.cal-legend span{ display:inline-flex; align-items:center; gap:6px; }
+.cal-legend i{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+
 .created-line{
   text-align:center;
   font-size: 11px;
   color: var(--fg-faint);
-  margin-top: 16px;
+  margin-top: 18px;
 }
+
+.toast{ position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 24px); transform:translateX(-50%) translateY(10px); background:var(--fg); color:var(--bg); font-size:13px; font-weight:700; padding:10px 18px; border-radius:999px; opacity:0; transition:opacity 200ms ease, transform 200ms ease; z-index:90; pointer-events:none; white-space:nowrap; }
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+.cal-nav{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 14px; }
+.cal-nav .m{ font-size:15px; font-weight:800; }
+.cal-nav button{ width:30px; height:30px; border-radius:50%; border:1px solid var(--border); background:var(--surface); color:var(--fg); display:flex; align-items:center; justify-content:center; }
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+.cal-dow{ font-size:10px; color:var(--fg-faint); text-align:center; font-weight:700; }
+.cal-day{ aspect-ratio:1; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:650; background:var(--surface); border:1px solid var(--border); cursor:pointer; }
+.cal-day.marked{ background:var(--st-slobodna); color:#fff; border-color:transparent; }
+.cal-day.marked.sex{ background:#e0197a; }
+.cal-day.end-mark{ box-shadow: 0 0 0 2px var(--st-gotovo) inset; }
+.cal-day.empty{ visibility:hidden; }
+.cal-summary{ margin-top:18px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:13px 15px; display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:650; }
+.cal-summary .n{ font-variant-numeric:tabular-nums; font-size:22px; font-weight:800; color:var(--accent); }
 
 /* photo picker */
 .photo-picker-row{ display:flex; align-items:center; gap:16px; margin: 14px 0 6px; }
@@ -514,6 +635,9 @@ button{ font-family: inherit; }
   width:100%; background: var(--surface); border:1px solid var(--border); border-radius:12px;
   padding: 10px 12px; font-size:15px; color:var(--fg); font-family:inherit; outline:none;
 }
+/* native <select> dropdown panels ignore translucent (rgba) backgrounds and can
+   render white-on-white; force every <option> to a solid, theme-correct pair */
+select, option{ background-color: var(--bg); color: var(--fg); }
 .form-field textarea{ resize:vertical; min-height:56px; }
 
 .delete-zone{ margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border); text-align:center; }
@@ -525,6 +649,8 @@ button{ font-family: inherit; }
   #appRoot, .sheet, .switch .knob, .pressable{ transition: opacity .15s ease !important; transform:none !important; }
   .fp-btn.pulse{ animation: none !important; }
   .splash-word{ animation: none !important; opacity:1 !important; transform:none !important; }
+  .stat-col, .stat-row{ animation: none !important; opacity:1 !important; transform:none !important; }
+  .stat-col .bar{ transition: none !important; }
 }
 </style>
 </head>
@@ -578,31 +704,81 @@ button{ font-family: inherit; }
   <div class="grid" id="grid"></div>
 </div>
 
-<!-- detail sheet -->
-<div class="sheet-backdrop" id="detailBackdrop"><div></div></div>
-<div class="sheet" id="detailSheet" style="transform:translateY(100%)">
-  <div class="sheet-handle" id="detailHandle"></div>
-  <div class="detail-head">
-    <div class="detail-avatar" id="dAvatar"></div>
-    <div>
-      <div class="nm" id="dName"></div>
-      <div class="sub" id="dSub"></div>
+<div id="statsRoot">
+  <div class="topbar">
+    <div class="topbar-head">
+      <div><h1>Statistika</h1><p class="sub">Pregled na temelju tvojih dejtova</p></div>
     </div>
   </div>
-  <div class="detail-grid">
-    <div class="field-box"><label>Instagram</label><div id="dIg"></div></div>
-    <div class="field-box"><label>Broj</label><div id="dPhone"></div></div>
-    <div class="field-box"><label>Lokacija</label><div id="dLoc"></div></div>
-    <div class="field-box"><label>Upoznali</label><div id="dMet"></div></div>
+  <div class="stats-body">
+    <div class="cal-nav">
+      <button id="statPrevMonth" class="pressable"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <span class="m" id="statMonthLabel"></span>
+      <button id="statNextMonth" class="pressable"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="section-label">Najčešći dejtovi tog mjeseca</div>
+    <div class="stat-bars" id="statBars"></div>
+    <div class="cal-legend">
+      <span><i style="background:var(--accent)"></i>Aktivna</span>
+      <span><i style="background:var(--st-gotovo)"></i>Gotovo taj mjesec</span>
+      <span><i style="background:#e0197a"></i>• Spavao s njom</span>
+    </div>
+    <p class="crop-hint" style="margin-top:8px;">Roza točkica ostaje vidljiva i kad je stupac siv — "gotovo" boji samo mjesece otkad je stvarno označeno.</p>
+    <div class="section-label" style="margin-top:26px;">Pregled</div>
+    <div class="stat-legend" id="statLegend"></div>
   </div>
-  <div class="note-block" id="dNotesBlock"><div class="label">Bilješke</div><p id="dNotes"></p></div>
-  <div class="sheet-actions">
-    <button class="btn btn-primary" id="dEditBtn">Uredi profil</button>
-    <button class="btn-small" id="dEndBtn">Gotovo</button>
-    <button class="btn-small ok" id="dRestoreBtn" style="display:none">Vrati</button>
-  </div>
-  <p class="created-line" id="dCreated"></p>
 </div>
+
+<div class="tabbar" id="tabbar">
+  <button class="tab-btn active pressable" id="tabHome" data-tab="home">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+    Profili
+  </button>
+  <button class="tab-btn pressable" id="tabStats" data-tab="stats">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+    Statistika
+  </button>
+</div>
+
+<!-- full-screen profile -->
+<div class="pscrim" id="pscrim"></div>
+<div class="pdetail" id="pdetail">
+  <div class="stack-wrap" id="stackWrap">
+    <div class="seg-row" id="segRow"></div>
+    <button class="p-close" id="pClose"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="stack-track" id="stackTrack"></div>
+    <div class="p-tapzone left" id="zoneLeft"></div>
+    <div class="p-tapzone right" id="zoneRight"></div>
+  </div>
+  <div class="pbody">
+    <div class="rate-chip"><div class="num" id="pRate"></div><div class="lbl">Ocjena</div></div>
+    <div class="p-name-row"><span class="nm" id="pName"></span><span class="age" id="pAge"></span></div>
+    <div class="status-pill" id="pStatus"><span class="dot"></span><span id="pStatusText"></span></div>
+
+    <div class="detail-grid">
+      <div class="field-box"><label>Lokacija</label><div id="dLoc"></div></div>
+      <div class="field-box"><label>Upoznali</label><div id="dMet"></div></div>
+      <div class="field-box copyable" id="dIgField"><label>Instagram <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3.2"/></svg></label><div id="dIg"></div></div>
+      <div class="field-box copyable" id="dPhoneField"><label>Broj <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5c0 8 7 15 15 15l3-4-6-3-2 2c-3-1-5-3-6-6l2-2-3-6z"/></svg></label><div id="dPhone"></div></div>
+    </div>
+
+    <div class="note-block" id="dNotesBlock"><div class="label">Bilješke</div><p id="dNotes"></p></div>
+
+    <div class="dates-row" id="datesRow">
+      <div class="l">Dates<small>dodirni za kalendar</small></div>
+      <div class="n" id="dDatesCount">0</div>
+    </div>
+    <div class="sex-stat" id="sexStat"><span class="dot"></span><span id="sexStatText">Intimno: 0 / 0 dejtova</span></div>
+
+    <div class="sheet-actions">
+      <button class="btn btn-primary" id="dEditBtn">Uredi profil</button>
+      <button class="btn-small" id="dEndBtn">Gotovo</button>
+      <button class="btn-small ok" id="dRestoreBtn" style="display:none">Vrati</button>
+    </div>
+    <p class="created-line" id="dCreated"></p>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
 
 <!-- filter sheet -->
 <div class="sheet-backdrop" id="filterBackdrop"><div></div></div>
@@ -640,20 +816,7 @@ button{ font-family: inherit; }
 <div class="sheet" id="formSheet" style="transform:translateY(100%)">
   <div class="sheet-handle"></div>
   <h2 id="formTitle">Novi profil</h2>
-  <div class="photo-picker-row">
-    <div class="photo-picker" id="photoPicker">
-      <div class="photo-picker-empty" id="photoPickerEmpty">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="1.8"/><path d="M9 6l1.2-2h3.6L15 6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
-        <span>Dodaj sliku</span>
-      </div>
-      <img id="photoPreviewImg" alt="">
-    </div>
-    <div class="photo-picker-actions">
-      <button type="button" class="link-btn" id="photoChangeBtn" style="display:none">Promijeni sliku</button>
-      <button type="button" class="link-btn danger" id="photoRemoveBtn" style="display:none">Ukloni sliku</button>
-    </div>
-    <input type="file" accept="image/*" id="f_photo_input" style="display:none">
-  </div>
+  <p class="crop-hint" id="formPhotoHint" style="display:none;margin:-4px 0 8px;">Slike uredi izravno u profilu (otvori karticu → "+" na slikama).</p>
   <div class="form-field"><label>Ime i prezime</label><input id="f_name"></div>
   <div class="two-col">
     <div class="form-field"><label>Godine</label><input id="f_age" type="number"></div>
@@ -684,6 +847,7 @@ button{ font-family: inherit; }
 </div>
 
 <!-- crop sheet -->
+<input type="file" accept="image/*" id="addPhotoInput" style="display:none">
 <div class="sheet-backdrop" id="cropBackdrop"><div></div></div>
 <div class="sheet" id="cropSheet" style="transform:translateY(100%)">
   <div class="sheet-handle"></div>
@@ -701,6 +865,27 @@ button{ font-family: inherit; }
     <button class="btn btn-ghost" id="cropCancel">Odustani</button>
     <button class="btn btn-primary" id="cropSave">Spremi</button>
   </div>
+</div>
+
+<!-- dates calendar sheet -->
+<div class="sheet-backdrop" id="calBackdrop"><div></div></div>
+<div class="sheet" id="calSheet" style="transform:translateY(100%)">
+  <div class="sheet-handle"></div>
+  <h2>Dates</h2>
+  <div class="cal-nav">
+    <button id="calPrev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <span class="m" id="calMonthLabel"></span>
+    <button id="calNext"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+  <p class="crop-hint" style="margin-top:12px;">Dodirni dan: 1. put = dejt, 2. put = + intimno, 3. put = ukloni</p>
+  <div class="cal-legend">
+    <span><i style="background:var(--st-slobodna)"></i>Dejt</span>
+    <span><i style="background:#e0197a"></i>Dejt + intimno</span>
+    <span><i style="background:none;border:2px solid var(--st-gotovo)"></i>Gotovo</span>
+  </div>
+  <p class="created-line" id="calEndedNote" style="display:none;"></p>
+  <div class="cal-summary"><span>Ukupno dejtova</span><span class="n" id="calTotalCount">0</span></div>
 </div>
 
 <script>
@@ -880,7 +1065,6 @@ function makeDraggable(sheetEl, backdropEl, handleEl){
     });
   });
 }
-[["detailSheet","detailBackdrop","detailHandle"]].forEach(([s,b,h])=>makeDraggable(document.getElementById(s),document.getElementById(b),document.getElementById(h)));
 document.querySelectorAll(".sheet-backdrop").forEach(bd=>{
   bd.addEventListener("click",(e)=>{
     if(e.target!==bd) return;
@@ -919,13 +1103,17 @@ function render(){
   grid.innerHTML = shown.map(p=>{
     const st = statusInfo(p.status);
     const [g1,g2] = gradientFor(p.name);
-    const photoStyle = p.photo
-      ? `background-image:url('${p.photo}');background-size:cover;background-position:center;`
+    const cover = p.photos && p.photos[0];
+    const photoStyle = cover
+      ? `background-image:url('${cover}');background-size:cover;background-position:center;`
       : `background:linear-gradient(150deg, ${g1}, ${g2});`;
+    const hasSex = (p.dates||[]).some(d=>d.sex);
+    const sexMark = hasSex ? `<div class="sex-mark" title="Spavao s njom"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>` : "";
     return `
     <div class="card pressable ${p.ended?'ended':''}" data-id="${p.id}">
+      ${sexMark}
       <div class="photo" style="${photoStyle}">
-        ${p.photo ? '' : initials(p.name)}
+        ${cover ? '' : initials(p.name)}
         <div class="rating-pill">★ ${p.rating.toFixed(1)}</div>
         <div class="status-tag"><span class="dot" style="background:${p.ended?'var(--st-gotovo)':st.color}"></span>${p.ended?'Gotovo':st.label}</div>
       </div>
@@ -937,88 +1125,228 @@ function render(){
   }).join("") || `<div class="empty-state">Nema profila za ove filtere.</div>`;
 
   grid.querySelectorAll(".card").forEach(el=>{
-    el.addEventListener("click", ()=> openDetail(Number(el.dataset.id)));
+    el.addEventListener("click", ()=> openProfile(Number(el.dataset.id), el));
   });
   updateFilterDot();
 }
 
-/* ================= detail sheet ================= */
-function openDetail(id){
+/* ================= full-screen profile ================= */
+const pscrim = document.getElementById("pscrim");
+const pdetail = document.getElementById("pdetail");
+const stackWrap = document.getElementById("stackWrap");
+const stackTrack = document.getElementById("stackTrack");
+const segRow = document.getElementById("segRow");
+let slideIndex = 0;
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._hideT);
+  t._hideT = setTimeout(()=> t.classList.remove("show"), 1400);
+}
+function currentProfile(){ return profiles.find(p=>p.id===editingId); }
+
+function buildStack(p){
+  const photos = p.photos || [];
+  stackTrack.innerHTML = photos.map(url=>`<div class="stack-slide" style="background-image:url('${url}')"></div>`).join("")
+    + (photos.length ? "" : `<div class="stack-slide" style="background:linear-gradient(150deg, ${gradientFor(p.name)[0]}, ${gradientFor(p.name)[1]})">${initials(p.name)}</div>`)
+    + `<div class="stack-slide add pressable" id="addPhotoSlide"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Dodaj sliku</div>`;
+  const segCount = Math.max(photos.length, 1);
+  segRow.innerHTML = Array.from({length:segCount}).map(()=>`<div class="seg"><i></i></div>`).join("") + `<div class="seg" style="opacity:.35"><i></i></div>`;
+  slideIndex = 0;
+  setSlide(0, false);
+  document.getElementById("addPhotoSlide").addEventListener("click", ()=> document.getElementById("addPhotoInput").click());
+}
+function setSlide(i, animate=true){
+  const slides = stackTrack.children.length;
+  const realCount = Math.max((currentProfile().photos||[]).length, 1);
+  slideIndex = Math.max(0, Math.min(slides-1, i));
+  stackTrack.style.transition = animate ? "transform 260ms ease" : "none";
+  stackTrack.style.transform = `translateX(-${slideIndex*100}%)`;
+  [...segRow.children].forEach((seg,idx)=> seg.classList.toggle("done", idx <= slideIndex && idx < realCount));
+}
+document.getElementById("zoneLeft").addEventListener("click", ()=> setSlide(slideIndex-1));
+document.getElementById("zoneRight").addEventListener("click", ()=> setSlide(slideIndex+1));
+
+let stackDragging=false, stackStartX=0, stackLastX=0, stackLastT=0, stackVel=0, stackBaseOffset=0;
+stackWrap.addEventListener("pointerdown", (e)=>{
+  if(e.target.closest("button")) return; // let the close/add-photo buttons receive their own click
+  if(stackTrack.children.length < 2) return;
+  stackDragging = true; stackWrap.setPointerCapture(e.pointerId);
+  stackStartX = e.clientX; stackLastX = e.clientX; stackLastT = performance.now();
+  stackBaseOffset = -slideIndex * stackWrap.clientWidth;
+  stackTrack.style.transition = "none";
+});
+stackWrap.addEventListener("pointermove", (e)=>{
+  if(!stackDragging) return;
+  const dx = e.clientX - stackStartX;
+  stackTrack.style.transform = `translateX(${stackBaseOffset + dx}px)`;
+  const now = performance.now();
+  stackVel = (e.clientX - stackLastX) / Math.max(now-stackLastT, 1);
+  stackLastX = e.clientX; stackLastT = now;
+});
+function endStackDrag(e){
+  if(!stackDragging) return;
+  stackDragging = false;
+  const dx = e.clientX - stackStartX;
+  const w = stackWrap.clientWidth;
+  let target = slideIndex;
+  if(Math.abs(dx) > w*0.22 || Math.abs(stackVel) > 0.5) target = dx < 0 ? slideIndex+1 : slideIndex-1;
+  setSlide(target);
+}
+stackWrap.addEventListener("pointerup", endStackDrag);
+stackWrap.addEventListener("pointercancel", endStackDrag);
+
+function openProfile(id, triggerEl){
   const p = profiles.find(x=>x.id===id);
   if(!p) return;
   editingId = id;
   const st = statusInfo(p.status);
-  const [g1,g2] = gradientFor(p.name);
-  const dAvatar = document.getElementById("dAvatar");
-  if(p.photo){
-    dAvatar.style.background = `center/cover no-repeat url('${p.photo}')`;
-    dAvatar.textContent = "";
-  } else {
-    dAvatar.style.background = `linear-gradient(150deg, ${g1}, ${g2})`;
-    dAvatar.textContent = initials(p.name);
-  }
-  document.getElementById("dName").textContent = `${p.name}, ${p.age}`;
-  document.getElementById("dSub").innerHTML = `<span class="dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${p.ended?'var(--st-gotovo)':st.color};margin-right:6px;"></span>${p.ended?'Gotovo':st.label}`;
-  document.getElementById("dIg").textContent = p.ig || "—";
-  document.getElementById("dPhone").textContent = p.phone || "—";
+  document.getElementById("pRate").textContent = p.rating.toFixed(1);
+  document.getElementById("pName").textContent = p.name;
+  document.getElementById("pAge").textContent = p.age;
+  const pill = document.getElementById("pStatus");
+  pill.style.background = p.ended ? "var(--st-gotovo)" : st.color;
+  document.getElementById("pStatusText").textContent = p.ended ? "Gotovo" : st.label;
   document.getElementById("dLoc").textContent = p.location || "—";
   document.getElementById("dMet").textContent = p.met || "—";
+  document.getElementById("dIg").textContent = p.ig || "—";
+  document.getElementById("dPhone").textContent = p.phone || "—";
   const notesBlock = document.getElementById("dNotesBlock");
   if(p.notes){ notesBlock.style.display=""; document.getElementById("dNotes").textContent = p.notes; }
   else notesBlock.style.display = "none";
   document.getElementById("dEndBtn").style.display = p.ended ? "none" : "";
   document.getElementById("dRestoreBtn").style.display = p.ended ? "" : "none";
   document.getElementById("dCreated").textContent = p.createdAt ? `Profil dodan ${fmtDate(p.createdAt)}` : "";
-  openSheet(document.getElementById("detailSheet"), document.getElementById("detailBackdrop"));
+  document.getElementById("dDatesCount").textContent = (p.dates||[]).length;
+  updateSexStat(p);
+  buildStack(p);
+
+  if(triggerEl){
+    const r = triggerEl.getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    pdetail.style.transformOrigin = `${(cx/window.innerWidth)*100}% ${(cy/window.innerHeight)*100}%`;
+  }
+  pscrim.classList.add("show");
+  pdetail.classList.remove("closing");
+  document.getElementById("appRoot").classList.add("receded");
+  requestAnimationFrame(()=> pdetail.classList.add("show"));
 }
-document.getElementById("dEndBtn").addEventListener("click", async ()=>{
-  profiles = profiles.map(p=>p.id===editingId?{...p,ended:true}:p);
-  await dbPut(profiles.find(p=>p.id===editingId));
+function closeProfile(){
+  pdetail.classList.add("closing");
+  pdetail.classList.remove("show");
+  pscrim.classList.remove("show");
+  document.getElementById("appRoot").classList.remove("receded");
+}
+document.getElementById("pClose").addEventListener("click", closeProfile);
+pscrim.addEventListener("click", closeProfile);
+
+async function toggleEnded(ended){
+  const endedAt = ended ? new Date().toISOString().slice(0,10) : null;
+  profiles = profiles.map(p=>p.id===editingId?{...p,ended,endedAt}:p);
+  await dbPut(currentProfile());
   buzz(12);
-  closeSheet(document.getElementById("detailSheet"), document.getElementById("detailBackdrop"));
+  closeProfile();
   render();
-});
-document.getElementById("dRestoreBtn").addEventListener("click", async ()=>{
-  profiles = profiles.map(p=>p.id===editingId?{...p,ended:false}:p);
-  await dbPut(profiles.find(p=>p.id===editingId));
-  buzz(12);
-  closeSheet(document.getElementById("detailSheet"), document.getElementById("detailBackdrop"));
-  render();
-});
+}
+document.getElementById("dEndBtn").addEventListener("click", ()=> toggleEnded(true));
+document.getElementById("dRestoreBtn").addEventListener("click", ()=> toggleEnded(false));
 document.getElementById("dEditBtn").addEventListener("click", ()=>{
-  closeSheet(document.getElementById("detailSheet"), document.getElementById("detailBackdrop"));
+  closeProfile();
   openForm(editingId);
 });
 
-/* ================= photo picker ================= */
-let formPhotoData = null;
-const photoInput = document.getElementById("f_photo_input");
-const photoPreviewImg = document.getElementById("photoPreviewImg");
-const photoPickerEmpty = document.getElementById("photoPickerEmpty");
-const photoChangeBtn = document.getElementById("photoChangeBtn");
-const photoRemoveBtn = document.getElementById("photoRemoveBtn");
-document.getElementById("photoPicker").addEventListener("click", ()=> photoInput.click());
-photoChangeBtn.addEventListener("click", (e)=>{ e.stopPropagation(); photoInput.click(); });
-photoRemoveBtn.addEventListener("click", (e)=>{ e.stopPropagation(); formPhotoData=null; photoInput.value=""; updatePhotoPreview(); });
-photoInput.addEventListener("change", ()=>{
-  const file = photoInput.files[0];
+/* copy-to-clipboard fields */
+function wireCopyField(fieldId, valueId, label){
+  document.getElementById(fieldId).addEventListener("click", async ()=>{
+    const val = document.getElementById(valueId).textContent;
+    if(!val || val === "—") return;
+    try{ await navigator.clipboard.writeText(val); }catch(e){}
+    showToast(`${label} kopiran`);
+  });
+}
+wireCopyField("dIgField", "dIg", "Instagram");
+wireCopyField("dPhoneField", "dPhone", "Broj");
+
+/* SEX — read-only summary, derived from how many calendar dates are marked intimate */
+function updateSexStat(p){
+  const dates = p.dates || [];
+  const sexCount = dates.filter(d=>d.sex).length;
+  document.getElementById("sexStatText").textContent = `Intimno: ${sexCount} / ${dates.length} dejtova`;
+}
+
+/* ================= dates calendar (tap a day: dejt → dejt+intimno → ukloni) ================= */
+const MONTH_NAMES = ["Siječanj","Veljača","Ožujak","Travanj","Svibanj","Lipanj","Srpanj","Kolovoz","Rujan","Listopad","Studeni","Prosinac"];
+const DOW = ["P","U","S","Č","P","S","N"];
+let calYear, calMonth;
+function isoDay(y,m,d){ return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`; }
+function renderCalendar(){
+  const p = currentProfile();
+  const dates = p.dates || [];
+  document.getElementById("calMonthLabel").textContent = `${MONTH_NAMES[calMonth]} ${calYear}`;
+  const first = new Date(calYear, calMonth, 1);
+  let startOffset = first.getDay() - 1; if(startOffset < 0) startOffset = 6; // Monday-first
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  let html = DOW.map(d=>`<div class="cal-dow">${d}</div>`).join("");
+  for(let i=0;i<startOffset;i++) html += `<div class="cal-day empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const iso = isoDay(calYear, calMonth, d);
+    const entry = dates.find(x=>x.date===iso);
+    let cls = entry ? (entry.sex ? "marked sex" : "marked") : "";
+    if(p.endedAt === iso) cls += " end-mark";
+    html += `<div class="cal-day ${cls}" data-iso="${iso}">${d}</div>`;
+  }
+  const calGrid = document.getElementById("calGrid");
+  calGrid.innerHTML = html;
+  const noteEl = document.getElementById("calEndedNote");
+  if(p.endedAt){ noteEl.style.display = "block"; noteEl.textContent = `Označeno kao gotovo: ${fmtDate(p.endedAt)}`; }
+  else noteEl.style.display = "none";
+  calGrid.querySelectorAll(".cal-day[data-iso]").forEach(el=>{
+    el.addEventListener("click", async ()=>{
+      const iso = el.dataset.iso;
+      const prof = currentProfile();
+      const list = prof.dates || (prof.dates = []);
+      const idx = list.findIndex(x=>x.date===iso);
+      let cls;
+      if(idx === -1){
+        list.push({date: iso, sex:false});
+        cls = "cal-day marked";
+      } else if(!list[idx].sex){
+        list[idx].sex = true;
+        cls = "cal-day marked sex";
+      } else {
+        list.splice(idx, 1);
+        cls = "cal-day";
+      }
+      if(prof.endedAt === iso) cls += " end-mark";
+      el.className = cls;
+      prof.dates = list.slice().sort((a,b)=> a.date.localeCompare(b.date));
+      await dbPut(prof);
+      document.getElementById("calTotalCount").textContent = prof.dates.length;
+      document.getElementById("dDatesCount").textContent = prof.dates.length;
+      updateSexStat(prof);
+      buzz(8);
+    });
+  });
+  document.getElementById("calTotalCount").textContent = dates.length;
+}
+document.getElementById("datesRow").addEventListener("click", ()=>{
+  const now = new Date();
+  calYear = now.getFullYear(); calMonth = now.getMonth();
+  renderCalendar();
+  openSheet(document.getElementById("calSheet"), document.getElementById("calBackdrop"));
+});
+document.getElementById("calPrev").addEventListener("click", ()=>{ calMonth--; if(calMonth<0){calMonth=11; calYear--;} renderCalendar(); });
+document.getElementById("calNext").addEventListener("click", ()=>{ calMonth++; if(calMonth>11){calMonth=0; calYear++;} renderCalendar(); });
+
+/* ================= add-photo trigger (photos now live on the profile itself) ================= */
+const addPhotoInput = document.getElementById("addPhotoInput");
+addPhotoInput.addEventListener("change", ()=>{
+  const file = addPhotoInput.files[0];
   if(!file) return;
   startCrop(file);
 });
-function updatePhotoPreview(){
-  if(formPhotoData){
-    photoPreviewImg.src = formPhotoData;
-    photoPreviewImg.style.display = "block";
-    photoPickerEmpty.style.display = "none";
-    photoChangeBtn.style.display = "block";
-    photoRemoveBtn.style.display = "block";
-  } else {
-    photoPreviewImg.style.display = "none";
-    photoPickerEmpty.style.display = "flex";
-    photoChangeBtn.style.display = "none";
-    photoRemoveBtn.style.display = "none";
-  }
-}
 
 /* ================= photo crop (drag to position, slider to zoom) ================= */
 const cropFrameEl = document.getElementById("cropFrame");
@@ -1116,7 +1444,7 @@ cropFrameEl.addEventListener("pointermove", (e)=>{
 cropZoomEl.addEventListener("input", updateCropScale);
 document.getElementById("cropCancel").addEventListener("click", ()=>{
   cropState = null;
-  photoInput.value = "";
+  addPhotoInput.value = "";
   closeCropSheet();
 });
 document.getElementById("cropSave").addEventListener("click", ()=>{
@@ -1126,16 +1454,23 @@ document.getElementById("cropSave").addEventListener("click", ()=>{
   canvas.width = OUT; canvas.height = OUT;
   const ctx = canvas.getContext("2d");
   const img = new Image();
-  img.onload = ()=>{
+  img.onload = async ()=>{
     const scale = cropState.scale;
     const sx = -cropState.offsetX / scale;
     const sy = -cropState.offsetY / scale;
     const sSize = cropState.frameSize / scale;
     ctx.drawImage(img, sx, sy, sSize, sSize, 0, 0, OUT, OUT);
-    formPhotoData = canvas.toDataURL("image/jpeg", 0.88);
-    updatePhotoPreview();
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+    const p = currentProfile();
+    p.photos = [...(p.photos||[]), dataUrl];
+    await dbPut(p);
+    buildStack(p);
+    setSlide((p.photos.length-1), false);
+    render();
     cropState = null;
+    addPhotoInput.value = "";
     closeCropSheet();
+    showToast("Slika dodana");
   };
   img.src = cropState.src;
 });
@@ -1148,8 +1483,7 @@ function openForm(id){
   editingId = id || null;
   document.getElementById("formTitle").textContent = id ? "Uredi profil" : "Novi profil";
   const p = id ? profiles.find(x=>x.id===id) : null;
-  formPhotoData = p ? (p.photo || null) : null;
-  updatePhotoPreview();
+  document.getElementById("formPhotoHint").style.display = id ? "block" : "none";
   document.getElementById("f_name").value = p ? p.name : "";
   document.getElementById("f_age").value = p ? p.age : "";
   statusSelect.value = p ? p.status : "slobodna";
@@ -1194,14 +1528,13 @@ document.getElementById("formSave").addEventListener("click", async ()=>{
     rating: Math.max(0, Math.min(10, Number(document.getElementById("f_rating").value) || 0)),
     met: document.getElementById("f_met").value.trim() || "—",
     notes: document.getElementById("f_notes").value.trim() || "",
-    photo: formPhotoData,
   };
   let saved;
   if(editingId){
     profiles = profiles.map(p=>p.id===editingId?{...p,...data}:p);
     saved = profiles.find(p=>p.id===editingId);
   } else {
-    saved = { id: Date.now(), ended:false, createdAt: new Date().toISOString(), ...data };
+    saved = { id: Date.now(), ended:false, endedAt:null, createdAt: new Date().toISOString(), photos:[], dates:[], ...data };
     profiles.unshift(saved);
   }
   await dbPut(saved);
@@ -1305,7 +1638,7 @@ async function registerBiometric(){
     rp: { name: "PlayBook" },
     user: { id: randomBytes(16), name: "playbook-local", displayName: "PlayBook" },
     pubKeyCredParams: [{ type:"public-key", alg:-7 }, { type:"public-key", alg:-257 }],
-    authenticatorSelection: { authenticatorAttachment:"platform", userVerification:"required" },
+    authenticatorSelection: { authenticatorAttachment:"platform", userVerification:"required", residentKey:"discouraged", requireResidentKey:false },
     timeout: 60000,
     attestation: "none",
   }});
@@ -1398,6 +1731,117 @@ async function initLock(){
     pinInput.value = "";
     pinInput.focus();
   }
+}
+
+/* ================= main nav (Profili / Statistika) ================= */
+function switchTab(tab){
+  document.getElementById("tabHome").classList.toggle("active", tab==="home");
+  document.getElementById("tabStats").classList.toggle("active", tab==="stats");
+  document.getElementById("appRoot").style.display = tab==="home" ? "block" : "none";
+  document.getElementById("statsRoot").style.display = tab==="stats" ? "block" : "none";
+  if(tab==="stats") renderStats();
+}
+document.getElementById("tabHome").addEventListener("click", ()=> switchTab("home"));
+document.getElementById("tabStats").addEventListener("click", ()=> switchTab("stats"));
+document.getElementById("statPrevMonth").addEventListener("click", ()=>{
+  statMonth--; if(statMonth<0){ statMonth=11; statYear--; }
+  renderStats();
+});
+document.getElementById("statNextMonth").addEventListener("click", ()=>{
+  statMonth++; if(statMonth>11){ statMonth=0; statYear++; }
+  renderStats();
+});
+
+let statYear, statMonth;
+function statMonthKey(){ return `${statYear}-${String(statMonth+1).padStart(2,"0")}`; }
+function renderStats(){
+  if(statYear === undefined){
+    const now = new Date();
+    statYear = now.getFullYear(); statMonth = now.getMonth();
+  }
+  document.getElementById("statMonthLabel").textContent = `${MONTH_NAMES[statMonth]} ${statYear}`;
+  const barsEl = document.getElementById("statBars");
+  const legendEl = document.getElementById("statLegend");
+  if(profiles.length === 0){
+    barsEl.innerHTML = "";
+    legendEl.innerHTML = `<div class="stats-empty">Dodaj profile i bilježi dejtove da vidiš statistiku ovdje.</div>`;
+    return;
+  }
+  const ym = statMonthKey();
+  const ranked = profiles.map(p=>{
+    // "ended" only greys out the months from the point she was actually marked
+    // gotovo onward — earlier months still show her real colour. The month
+    // after that, she drops out of the stats entirely (her history still
+    // lives on her own card/calendar, just not in the monthly ranking).
+    const endedMonth = p.ended && p.endedAt ? p.endedAt.slice(0,7) : null;
+    const endedAsOfMonth = p.ended && (!endedMonth || endedMonth <= ym); // no date on record → always grey, never hidden
+    const droppedOut = !!endedMonth && endedMonth < ym;
+    const [g1,g2] = gradientFor(p.name);
+    return {
+      name: p.name.split(" ")[0],
+      count: (p.dates||[]).filter(d=>d.date.startsWith(ym)).length,
+      endedAsOfMonth,
+      droppedOut,
+      hasSex: (p.dates||[]).some(d=> d.sex && d.date.slice(0,7) <= ym),
+      photo: p.photos && p.photos[0],
+      initials: initials(p.name), g1, g2,
+    };
+  }).filter(r=> !r.droppedOut).sort((a,b)=> b.count - a.count).slice(0,8);
+  const maxCount = Math.max(1, ...ranked.map(r=>r.count));
+  barsEl.innerHTML = ranked.map((r,i)=>{
+    const avatarStyle = r.photo
+      ? `background-image:url('${r.photo}');background-size:cover;background-position:center;`
+      : `background:linear-gradient(150deg, ${r.g1}, ${r.g2});`;
+    return `
+    <div class="stat-col ${r.endedAsOfMonth?'is-ended-now':''} ${r.hasSex?'is-sex':''}" style="animation-delay:${i*45}ms">
+      <div class="v">${r.count}</div>
+      <div class="stat-avatar" style="${avatarStyle}">${r.photo?'':r.initials}${r.hasSex?'<span class="sx"></span>':''}</div>
+      <div class="bar" data-h="${Math.max(4, Math.round((r.count/maxCount)*130))}"></div>
+      <div class="l">${r.name}</div>
+    </div>`;
+  }).join("");
+  requestAnimationFrame(()=> requestAnimationFrame(()=>{
+    barsEl.querySelectorAll(".bar").forEach(b=> b.style.height = b.dataset.h+"px");
+  }));
+
+  function monthBreakdown(onlySex){
+    return profiles.map(p=>({
+      name: p.name,
+      count: (p.dates||[]).filter(d=> d.date.startsWith(ym) && (!onlySex || d.sex)).length,
+    })).filter(x=>x.count>0).sort((a,b)=>b.count-a.count);
+  }
+  const allDates = profiles.flatMap(p=>p.dates||[]);
+  const datesThisMonth = allDates.filter(d=>d.date.startsWith(ym)).length;
+  const sexThisMonth = allDates.filter(d=>d.date.startsWith(ym) && d.sex).length;
+  const activeCount = profiles.filter(p=>!p.ended).length;
+  const rows = [
+    { key:"dates", label:"Dejtova taj mjesec", value:datesThisMonth, clickable:true },
+    { key:"sex", label:"Intimno taj mjesec", value:sexThisMonth, clickable:true },
+    { key:"active", label:"Aktivni profili", value:activeCount, clickable:false },
+  ];
+  legendEl.innerHTML = rows.map((r,i)=>{
+    const chev = r.clickable ? `<svg class="row-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>` : "";
+    return `<div class="stat-row-wrap" style="animation-delay:${200+i*50}ms">
+      <div class="stat-row ${r.clickable?'clickable':''}" data-key="${r.key}"><span>${r.label}</span><span class="v-wrap"><span class="v">${r.value}</span>${chev}</span></div>
+      ${r.clickable ? `<div class="stat-breakdown" id="breakdown-${r.key}" hidden></div>` : ""}
+    </div>`;
+  }).join("");
+  legendEl.querySelectorAll(".stat-row.clickable").forEach(row=>{
+    row.addEventListener("click", ()=>{
+      const key = row.dataset.key;
+      const panel = document.getElementById(`breakdown-${key}`);
+      const willOpen = panel.hidden;
+      panel.hidden = !willOpen;
+      row.classList.toggle("open", willOpen);
+      if(willOpen){
+        const list = monthBreakdown(key==="sex");
+        panel.innerHTML = list.length
+          ? list.map(x=>`<div class="bd-row"><span>${x.name}</span><span>${x.count}×</span></div>`).join("")
+          : `<div class="bd-row empty">Nema podataka taj mjesec</div>`;
+      }
+      buzz(6);
+    });
+  });
 }
 
 /* ================= boot ================= */
