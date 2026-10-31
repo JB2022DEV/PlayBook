@@ -1171,10 +1171,11 @@ document.getElementById("zoneRight").addEventListener("click", ()=> setSlide(sli
 
 let stackDragging=false, stackStartX=0, stackLastX=0, stackLastT=0, stackVel=0, stackBaseOffset=0;
 stackWrap.addEventListener("pointerdown", (e)=>{
-  if(e.target.closest("button")) return; // let the close/add-photo buttons receive their own click
+  if(e.target.closest("button, .stack-slide.add")) return; // let the close/add-photo controls receive their own click
   if(stackTrack.children.length < 2) return;
   stackDragging = true; stackWrap.setPointerCapture(e.pointerId);
   stackStartX = e.clientX; stackLastX = e.clientX; stackLastT = performance.now();
+  stackVel = 0; // reset: a stale velocity from the previous swipe must never leak into the next tap/drag
   stackBaseOffset = -slideIndex * stackWrap.clientWidth;
   stackTrack.style.transition = "none";
 });
@@ -1192,7 +1193,8 @@ function endStackDrag(e){
   const dx = e.clientX - stackStartX;
   const w = stackWrap.clientWidth;
   let target = slideIndex;
-  if(Math.abs(dx) > w*0.22 || Math.abs(stackVel) > 0.5) target = dx < 0 ? slideIndex+1 : slideIndex-1;
+  // only treat this as a swipe once there's real movement; a plain tap (dx≈0) must never change slides
+  if(Math.abs(dx) > 4 && (Math.abs(dx) > w*0.22 || Math.abs(stackVel) > 0.5)) target = dx < 0 ? slideIndex+1 : slideIndex-1;
   setSlide(target);
 }
 stackWrap.addEventListener("pointerup", endStackDrag);

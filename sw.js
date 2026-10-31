@@ -1,4 +1,4 @@
-const CACHE = "playbook-v10";
+const CACHE = "playbook-v11";
 const ASSETS = [
   "./",
   "./index.html",
